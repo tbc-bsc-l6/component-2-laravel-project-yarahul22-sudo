@@ -49,4 +49,53 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+
+    /**
+     * Role relationship.
+     */
+    public function role()
+    {
+        return $this->belongsTo(UserRole::class, 'user_role_id');
+    }
+
+    /**
+     * Modules this user is enrolled on (as a student).
+     */
+    public function enrolments()
+    {
+        return $this->hasMany(Enrolment::class);
+    }
+
+    public function enrolledModules()
+    {
+        return $this->belongsToMany(Module::class, 'enrolments')->withTimestamps();
+    }
+
+    /**
+     * Modules this user teaches.
+     */
+    public function teachingModules()
+    {
+        return $this->hasMany(Module::class, 'teacher_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role?->slug === 'admin';
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->role?->slug === 'teacher';
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role?->slug === 'student';
+    }
+
+    public function isOldStudent(): bool
+    {
+        return $this->role?->slug === 'old-student';
+    }
 }

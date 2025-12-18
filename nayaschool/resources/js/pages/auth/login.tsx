@@ -24,8 +24,8 @@ export default function Login({
 }: LoginProps) {
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title="Welcome back to NayaSchool"
+            description="Choose the account you were given (admin, teacher, or student) and log in to see your tailored dashboard."
         >
             <Head title="Log in" />
 
@@ -37,6 +37,14 @@ export default function Login({
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-6">
+                            <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/30 p-3 text-xs text-muted-foreground">
+                                <p className="mb-1 font-semibold text-foreground">
+                                    Demo accounts
+                                </p>
+                                <p>Admin: admin@example.com / password</p>
+                                <p>Teacher: teacher@example.com / password</p>
+                                <p>Student: student@example.com / password</p>
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email address</Label>
                                 <Input
