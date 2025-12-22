@@ -13,9 +13,9 @@ class Module extends Model
         'code',
         'title',
         'description',
-        'is_available',
-        'max_students',
         'teacher_id',
+        'max_students',
+        'is_available',
     ];
 
     protected $casts = [
@@ -35,8 +35,8 @@ class Module extends Model
 
     public function students()
     {
-        return $this->belongsToMany(User::class, 'enrolments')->withTimestamps();
+        return $this->belongsToMany(User::class, 'enrolments')
+            ->withTimestamps()
+            ->withPivot(['enrolled_at', 'completed_at', 'result']);
     }
 }
-
-
