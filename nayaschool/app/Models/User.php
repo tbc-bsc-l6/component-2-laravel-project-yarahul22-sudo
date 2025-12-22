@@ -50,52 +50,42 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Role relationship.
-     */
-    public function role()
+    // Role methods
+    public function isAdmin(): bool
     {
-        return $this->belongsTo(UserRole::class, 'user_role_id');
+        return $this->role_id === 1 || $this->role === 'admin';
     }
 
-    /**
-     * Modules this user is enrolled on (as a student).
-     */
-    public function enrolments()
+    public function isTeacher(): bool
     {
-        return $this->hasMany(Enrolment::class);
+        return $this->role_id === 2 || $this->role === 'teacher';
     }
 
-    public function enrolledModules()
+    public function isStudent(): bool
     {
-        return $this->belongsToMany(Module::class, 'enrolments')->withTimestamps();
+        return $this->role_id === 3 || $this->role === 'student';
     }
 
-    /**
-     * Modules this user teaches.
-     */
+    public function isOldStudent(): bool
+    {
+        return $this->role_id === 4 || $this->role === 'old_student';
+    }
+
+    // Relationships
     public function teachingModules()
     {
         return $this->hasMany(Module::class, 'teacher_id');
     }
 
-    public function isAdmin(): bool
+    public function enrolments()
     {
-        return $this->role?->slug === 'admin';
+        return $this->hasMany(Enrolment::class);
     }
 
-    public function isTeacher(): bool
+    public function modules()
     {
-        return $this->role?->slug === 'teacher';
-    }
-
-    public function isStudent(): bool
-    {
-        return $this->role?->slug === 'student';
-    }
-
-    public function isOldStudent(): bool
-    {
-        return $this->role?->slug === 'old-student';
+        return $this->belongsToMany(Module::class, 'enrolments')
+            ->withTimestamps()
+            ->withPivot(['enrolled_at', 'completed_at', 'result']);
     }
 }
