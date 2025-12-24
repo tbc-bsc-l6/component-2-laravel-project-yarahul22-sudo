@@ -35,6 +35,21 @@ type Module = {
         id: number;
         name: string;
     } | null;
+    students_count?: number;
+};
+
+type Teacher = {
+    id: number;
+    name: string;
+    email: string;
+    modules_count?: number;
+};
+
+type Student = {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
 };
 
 type PagedModules = {
@@ -49,6 +64,8 @@ type PagedModules = {
 
 type PageProps = SharedData & {
     modules: Module[] | PagedModules;
+    teachers?: Teacher[];
+    students?: Student[];
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -64,7 +81,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function AdminDashboard() {
     const { props } = usePage<PageProps>();
-    const { modules, auth } = props;
+    const { modules, auth, teachers = [], students = [] } = props;
 
     const [modulesState, setModulesState] = useState<Module[]>(() =>
         Array.isArray(modules) ? modules : modules.data ?? [],
@@ -124,6 +141,100 @@ export default function AdminDashboard() {
                     </span>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
+                    {/* Teachers Section */}
+                    <section className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-lg font-semibold">Teachers</h2>
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button size="sm">Add Teacher</Button>
+                                </SheetTrigger>
+                                <SheetContent>
+                                    <SheetHeader>
+                                        <SheetTitle>Create Teacher Account</SheetTitle>
+                                        <SheetDescription>
+                                            Add a new teacher to the system
+                                        </SheetDescription>
+                                    </SheetHeader>
+                                    <form 
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const formData = new FormData(e.currentTarget);
+                                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                            fetch('/admin/teachers', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': token,
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    name: formData.get('name'),
+                                                    email: formData.get('email'),
+                                                    password: formData.get('password'),
+                                                }),
+                                            })
+                                            .then(res => res.ok ? window.location.reload() : res.json().then(body => alert(body.message || 'Failed')))
+                                            .catch(() => alert('Error creating teacher'));
+                                        }}
+                                        className="grid gap-3 p-4"
+                                    >
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium">Name</label>
+                                            <Input name="name" required />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium">Email</label>
+                                            <Input name="email" type="email" required />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium">Password</label>
+                                            <Input name="password" type="password" required />
+                                        </div>
+                                        <Button type="submit">Create Teacher</Button>
+                                    </form>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                            {teachers.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No teachers yet.</p>
+                            ) : (
+                                teachers.map((teacher) => (
+                                    <Card key={teacher.id}>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">{teacher.name}</CardTitle>
+                                            <p className="text-sm text-muted-foreground">{teacher.email}</p>
+                                        </CardHeader>
+                                        <CardFooter className="justify-between">
+                                            <Badge variant="secondary">
+                                                {teacher.modules_count || 0} module(s)
+                                            </Badge>
+                                            <Button 
+                                                size="sm" 
+                                                variant="destructive"
+                                                onClick={async () => {
+                                                    if (!confirm(`Delete teacher ${teacher.name}?`)) return;
+                                                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                    try {
+                                                        const res = await fetch(`/admin/teachers/${teacher.id}`, {
+                                                            method: 'DELETE',
+                                                            headers: { 'X-CSRF-TOKEN': token, Accept: 'application/json' },
+                                                        });
+                                                        if (res.ok) window.location.reload();
+                                                        else alert('Failed to delete teacher');
+                                                    } catch { alert('Error deleting teacher'); }
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                ))
+                            )}
+                        </div>
+                    </section>
+
                     <section>
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold">Create Module</h3>
@@ -345,50 +456,80 @@ export default function AdminDashboard() {
                                                 </Badge>
                                             )}
                                         </div>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={async () => {
-                                                        const id = m.id;
-                                                        const teacherId = window.prompt('Enter teacher id to assign (empty to unassign):');
-                                                        if (teacherId === null) return; // cancelled
-
-                                                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                        try {
-                                                            const res = await fetch(`/admin/modules/${id}/teacher`, {
+                                        <div className="flex items-center gap-2">
+                                            <Sheet>
+                                                <SheetTrigger asChild>
+                                                    <Button size="sm" variant="outline">
+                                                        Assign Teacher
+                                                    </Button>
+                                                </SheetTrigger>
+                                                <SheetContent>
+                                                    <SheetHeader>
+                                                        <SheetTitle>Assign Teacher to {m.code}</SheetTitle>
+                                                        <SheetDescription>
+                                                            Select a teacher for this module
+                                                        </SheetDescription>
+                                                    </SheetHeader>
+                                                    <form
+                                                        onSubmit={(e) => {
+                                                            e.preventDefault();
+                                                            const formData = new FormData(e.currentTarget);
+                                                            const teacherId = formData.get('teacher_id');
+                                                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                            fetch(`/admin/modules/${m.id}/teacher`, {
                                                                 method: 'PATCH',
                                                                 headers: {
-                                                                    'Content-Type': 'application/json',
                                                                     'X-CSRF-TOKEN': token,
-                                                                    Accept: 'application/json',
+                                                                    'Accept': 'application/json',
+                                                                    'Content-Type': 'application/json',
                                                                 },
-                                                                credentials: 'same-origin',
                                                                 body: JSON.stringify({ teacher_id: teacherId === '' ? null : Number(teacherId) }),
-                                                            });
+                                                            })
+                                                            .then(res => res.ok ? window.location.reload() : alert('Failed'))
+                                                            .catch(() => alert('Error'));
+                                                        }}
+                                                        className="grid gap-3 p-4"
+                                                    >
+                                                        <div>
+                                                            <label className="mb-1 block text-sm font-medium">Teacher</label>
+                                                            <select 
+                                                                name="teacher_id" 
+                                                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                                defaultValue={m.teacher?.id ?? ''}
+                                                            >
+                                                                <option value="">Unassigned</option>
+                                                                {teachers.map(t => (
+                                                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <Button type="submit">Save</Button>
+                                                    </form>
+                                                </SheetContent>
+                                            </Sheet>
 
-                                                            if (!res.ok) {
-                                                                const body = await res.json().catch(() => null);
-                                                                alert('Failed to assign teacher: ' + (body?.message ?? res.statusText));
-                                                                return;
-                                                            }
+                                            <Button
+                                                size="sm"
+                                                variant={m.is_available ? 'secondary' : 'default'}
+                                                onClick={async () => {
+                                                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                    try {
+                                                        const res = await fetch(`/admin/modules/${m.id}/toggle`, {
+                                                            method: 'PATCH',
+                                                            headers: { 'X-CSRF-TOKEN': token, Accept: 'application/json' },
+                                                        });
+                                                        if (res.ok) window.location.reload();
+                                                        else alert('Failed to toggle');
+                                                    } catch { alert('Error'); }
+                                                }}
+                                            >
+                                                {m.is_available ? 'Archive' : 'Activate'}
+                                            </Button>
 
-                                                            // refresh to reflect assignment
-                                                            window.location.reload();
-                                                        } catch (err) {
-                                                            // eslint-disable-next-line no-console
-                                                            console.error('assign teacher error', err);
-                                                            alert('Error assigning teacher');
-                                                        }
-                                                    }}
-                                                >
-                                                    Assign Teacher
-                                                </Button>
-
-                                                <Button
-                                                    size="sm"
-                                                    variant="destructive"
-                                                    onClick={async () => {
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={async () => {
                                                         if (!window.confirm('Delete this module? This action cannot be undone.')) return;
                                                         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                                                         try {
