@@ -1,13 +1,42 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import {
+    BookOpen,
+    CheckCircle2,
+    Clock3,
+    Users,
+    XCircle,
+} from 'lucide-react';
+
+type Student = {
+    id: number;
+    name: string;
+    email: string;
+    pivot?: {
+        id: number;
+        enrolled_at?: string | null;
+        completed_at?: string | null;
+        result?: 'pass' | 'fail' | null;
+    };
+};
 
 type Module = {
     id: number;
     code: string;
     title: string;
     students_count: number;
+    students?: Student[];
 };
 
 type PageProps = SharedData & {
@@ -28,45 +57,241 @@ export default function TeacherDashboard() {
     const { props } = usePage<PageProps>();
     const { modules, auth } = props;
 
+    const scrollToSection = (id: string) => {
+        const el = document.getElementById(id);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const markResult = async (enrolmentId: number, result: 'pass' | 'fail') => {
+        const token = document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content');
+
+        if (!token) {
+            alert('Missing CSRF token.');
+            return;
+        }
+
+        const url = `/enrolments/${enrolmentId}/result`;
+
+        const res = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            referrer: window.location.href,
+            body: JSON.stringify({ result }),
+        });
+
+        if (!res.ok) {
+            const body = await res.json().catch(() => null);
+            const fallback = `Failed to update result (status ${res.status})`;
+            alert(body?.message ?? fallback);
+            return;
+        }
+
+        window.location.reload();
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Teacher Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Signed in as{' '}
-                        <span className="font-semibold text-foreground">
-                            {auth.user.name}
-                        </span>{' '}
-                        ({auth.user.role?.name ?? 'Teacher'})
-                    </span>
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
+                <div className="rounded-lg border border-slate-200 bg-white/90 p-5 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Welcome back</p>
+                            <h1 className="text-2xl font-semibold">{auth.user.name}</h1>
+                            <p className="text-sm text-muted-foreground">Teacher</p>
+                        </div>
+                        <Badge variant="secondary" className="gap-1">
+                            <BookOpen className="h-4 w-4" />
+                            Assigned modules: {modules.length}
+                        </Badge>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        <Button size="sm" className="gap-1" onClick={() => scrollToSection('teacher-modules')}>
+                            <Users className="h-4 w-4" /> Grade now
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
+                            <Clock3 className="mr-2 h-4 w-4" /> Refresh
+                        </Button>
+                    </div>
                 </div>
-                <section className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border">
-                    <h2 className="mb-3 text-lg font-semibold">My Modules</h2>
-                    <div className="space-y-2 text-sm">
-                        {modules.map((m) => (
-                            <div
-                                key={m.id}
-                                className="flex items-center justify-between rounded-md border px-3 py-2"
-                            >
+
+                {/* Quick Stats */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <Card className="overflow-hidden border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white shadow-md dark:border-blue-900 dark:from-blue-950 dark:to-slate-900">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-lg bg-blue-500 p-2.5 shadow-lg">
+                                    <BookOpen className="h-5 w-5 text-white" />
+                                </div>
                                 <div>
-                                    <div className="font-medium">
-                                        {m.code} — {m.title}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                        {m.students_count} enrolled student
-                                        {m.students_count === 1 ? '' : 's'}
-                                    </div>
+                                    <p className="text-2xl font-bold">{modules.length}</p>
+                                    <p className="text-xs text-muted-foreground">Assigned Modules</p>
                                 </div>
                             </div>
-                        ))}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="overflow-hidden border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white shadow-md dark:border-emerald-900 dark:from-emerald-950 dark:to-slate-900">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-lg bg-emerald-500 p-2.5 shadow-lg">
+                                    <Users className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold">
+                                        {modules.reduce((sum, m) => sum + (m.students?.length || 0), 0)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">Total Students</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="overflow-hidden border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white shadow-md dark:border-purple-900 dark:from-purple-950 dark:to-slate-900">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-lg bg-purple-500 p-2.5 shadow-lg">
+                                    <CheckCircle2 className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold">
+                                        {modules.reduce((sum, m) => sum + (m.students?.filter(s => s.pivot?.result).length || 0), 0)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">Graded</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div id="teacher-modules" className="grid grid-cols-1 gap-4">
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <div className="rounded-lg bg-primary/10 p-2">
+                                <Users className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold">My Modules</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Review students and record pass/fail results
+                                </p>
+                            </div>
+                        </div>
+
                         {modules.length === 0 && (
-                            <p className="text-sm text-muted-foreground">
-                                No modules assigned to you yet.
-                            </p>
+                            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/80 p-10 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                                <BookOpen className="mx-auto h-10 w-10 text-muted-foreground/60" />
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    No modules assigned to you yet.
+                                </p>
+                            </div>
                         )}
-                    </div>
-                </section>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            {modules.map((m) => (
+                                <Card key={m.id} className="overflow-hidden border border-slate-200 bg-white/90 shadow-md backdrop-blur transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/70">
+                                    <CardHeader className="border-b border-slate-200 bg-gradient-to-r from-white via-slate-50 to-slate-100 dark:border-slate-800 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="rounded-lg bg-primary/10 p-2">
+                                                    <BookOpen className="h-5 w-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="outline" className="font-mono text-xs">
+                                                            {m.code}
+                                                        </Badge>
+                                                        <CardTitle className="text-lg">{m.title}</CardTitle>
+                                                    </div>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {m.students_count} enrolled student{m.students_count === 1 ? '' : 's'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3 pt-4">
+                                        {m.students && m.students.length > 0 ? (
+                                            m.students.map((student) => (
+                                                <div
+                                                    key={student.id}
+                                                    className="flex items-start justify-between rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3 shadow-sm hover:border-primary/30 hover:shadow dark:border-slate-800 dark:bg-slate-900/50"
+                                                >
+                                                    <div>
+                                                        <p className="text-sm font-semibold">{student.name}</p>
+                                                        <p className="text-xs text-muted-foreground">{student.email}</p>
+                                                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                                            <div className="flex items-center gap-1">
+                                                                <Clock3 className="h-3 w-3" />
+                                                                Enrolled: {student.pivot?.enrolled_at ? new Date(student.pivot.enrolled_at).toLocaleDateString() : '—'}
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <CheckCircle2 className="h-3 w-3" />
+                                                                Completed: {student.pivot?.completed_at ? new Date(student.pivot.completed_at).toLocaleDateString() : 'Not set'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        {student.pivot?.result && (
+                                                            <Badge
+                                                                variant={student.pivot.result === 'pass' ? 'default' : 'destructive'}
+                                                                className="gap-1 text-xs"
+                                                            >
+                                                                {student.pivot.result === 'pass' ? (
+                                                                    <CheckCircle2 className="h-3 w-3" />
+                                                                ) : (
+                                                                    <XCircle className="h-3 w-3" />
+                                                                )}
+                                                                {student.pivot.result.toUpperCase()}
+                                                            </Badge>
+                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="h-8 gap-1"
+                                                                onClick={() => student.pivot?.id && markResult(student.pivot.id, 'pass')}
+                                                            >
+                                                                <CheckCircle2 className="h-3 w-3" />
+                                                                Pass
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                                onClick={() => student.pivot?.id && markResult(student.pivot.id, 'fail')}
+                                                            >
+                                                                <XCircle className="h-3 w-3" />
+                                                                Fail
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/80 p-6 text-center text-sm text-muted-foreground dark:border-slate-800 dark:bg-slate-900/50">
+                                                No students enrolled yet.
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                    <CardFooter className="border-t border-slate-200 bg-slate-50/60 py-3 dark:border-slate-800 dark:bg-slate-900/40">
+                                        <p className="text-xs text-muted-foreground">
+                                            Mark pass/fail to timestamp completion for each student.
+                                        </p>
+                                    </CardFooter>
+                                </Card>
+                            ))}
+                        </div>
+                    </section>
+                </div>
             </div>
         </AppLayout>
     );
