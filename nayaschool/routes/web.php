@@ -18,7 +18,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         if ($user?->isAdmin()) {
             // Paginate admin modules list for UI (3 per page so pagination shows after 3+ modules)
-            $modules = Module::with('teacher')->orderBy('id', 'desc')->paginate(3);
+            $modules = Module::with(['teacher', 'students' => function($query) {
+                $query->select('users.id', 'users.name', 'users.email')
+                    ->withPivot('id', 'enrolled_at', 'completed_at', 'result');
+            }])
+            ->withCount(['students' => function($query) {
+                // Only count active students (not completed) for capacity display
+                $query->whereNull('enrolments.completed_at');
+            }])
+            ->orderBy('id', 'desc')
+            ->paginate(3);
 
             // Build explicit structure so frontend always receives data + meta + links
             $modulesArr = [
@@ -32,13 +41,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'links' => $modules->toArray()['links'] ?? [],
             ];
 
+            // Get all teachers and students for admin dashboard
+            $teachers = \App\Models\User::where('role', 'teacher')
+                ->withCount('teachingModules')
+                ->orderBy('name')
+                ->get();
+
+            $students = \App\Models\User::whereIn('role', ['student', 'old_student'])
+                ->orderBy('name')
+                ->get();
+
             return Inertia::render('admin/dashboard', [
                 'modules' => $modulesArr,
+                'teachers' => $teachers,
+                'students' => $students,
             ]);
         }
 
         if ($user?->isTeacher()) {
-            $modules = $user->teachingModules()->withCount('students')->get();
+            $modules = $user->teachingModules()
+                ->with([
+                    'students' => function ($query) {
+                        $query->select('users.id', 'users.name', 'users.email')
+                            ->withPivot('id', 'enrolled_at', 'completed_at', 'result');
+                    },
+                ])
+                ->withCount('students')
+                ->orderByDesc('id')
+                ->get();
 
             return Inertia::render('teacher/dashboard', [
                 'modules' => $modules,
@@ -59,11 +89,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             $availableModules = [];
             if ($user->isStudent()) {
-                $enrolledModuleIds = $currentEnrolments->pluck('module_id');
+                // Get all module IDs the user has ever enrolled in (current or completed)
+                $allEnrolledIds = Enrolment::where('user_id', $user->id)
+                    ->pluck('module_id');
+                
+                // Get available modules, excluding those already enrolled/completed
                 $availableModules = Module::where('is_available', true)
-                    ->whereNotIn('id', $enrolledModuleIds)
-                    ->withCount('students')
-                    ->get();
+                    ->whereNotIn('id', $allEnrolledIds)
+                    ->withCount(['students' => function($query) {
+                        // Only count active students (not completed)
+                        $query->whereNull('enrolments.completed_at');
+                    }])
+                    ->get()
+                    ->filter(function($module) {
+                        // Only show modules that aren't full
+                        return $module->students_count < $module->max_students;
+                    });
             }
 
             return Inertia::render('student/dashboard', [
@@ -72,6 +113,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'availableModules' => $availableModules,
                 'canEnrolMore' => $user->isStudent()
                     && $currentEnrolments->count() < 4,
+                'isOldStudent' => $user->isOldStudent(),
             ]);
         }
 
@@ -80,6 +122,64 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin-only actions
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        // Teacher management
+        Route::post('/teachers', function (\Illuminate\Http\Request $request) {
+            $data = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8'],
+            ]);
+
+            \App\Models\User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+                'role' => 'teacher',
+                'email_verified_at' => now(),
+            ]);
+
+            return back();
+        })->name('teachers.store');
+
+        Route::delete('/teachers/{user}', function (\App\Models\User $user) {
+            if ($user->role !== 'teacher') {
+                abort(403, 'Can only delete teacher accounts');
+            }
+            
+            // Unassign from modules first
+            Module::where('teacher_id', $user->id)->update(['teacher_id' => null]);
+            
+            $user->delete();
+            return back();
+        })->name('teachers.destroy');
+
+        // Student management
+        Route::patch('/users/{user}/role', function (\Illuminate\Http\Request $request, \App\Models\User $user) {
+            $data = $request->validate([
+                'role' => ['required', 'in:admin,teacher,student,old_student'],
+            ]);
+
+            $user->update(['role' => $data['role']]);
+            return back();
+        })->name('users.change-role');
+
+        Route::delete('/enrolments/{enrolment}', function (Enrolment $enrolment) {
+            try {
+                $enrolment->delete();
+                
+                if (request()->wantsJson()) {
+                    return response()->json(['success' => true]);
+                }
+                return back();
+            } catch (\Exception $e) {
+                if (request()->wantsJson()) {
+                    return response()->json(['message' => 'Failed to delete enrolment: ' . $e->getMessage()], 500);
+                }
+                return back()->withErrors(['error' => 'Failed to delete enrolment']);
+            }
+        })->name('enrolments.destroy');
+
+        // Module management
         Route::post('/modules', function (\Illuminate\Http\Request $request) {
             $data = $request->validate([
                 'code' => ['required', 'string', 'unique:modules,code'],
@@ -138,7 +238,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             $user = auth()->user();
 
             // Respect module capacity and availability
-            if (! $module->is_available || $module->students()->count() >= $module->max_students) {
+            // Only count students who haven't completed the module (completed_at is NULL)
+            $activeStudentsCount = $module->students()
+                ->whereNull('enrolments.completed_at')
+                ->count();
+            
+            if (! $module->is_available || $activeStudentsCount >= $module->max_students) {
                 abort(422, 'Module is full or unavailable.');
             }
 
