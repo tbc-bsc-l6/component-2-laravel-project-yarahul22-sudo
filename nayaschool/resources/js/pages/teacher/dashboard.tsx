@@ -101,23 +101,23 @@ export default function TeacherDashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Teacher Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
-                <div className="rounded-lg border border-slate-200 bg-white/90 p-5 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+                <div className="rounded-xl border-2 border-blue-200/50 bg-white/95 backdrop-blur-sm p-6 shadow-2xl shadow-blue-500/10 dark:border-blue-800/50 dark:bg-slate-900/95 dark:shadow-blue-500/20 hover:shadow-blue-500/20 transition-all duration-500 animate-in fade-in slide-in-from-top-4 duration-700">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-muted-foreground">Welcome back</p>
-                            <h1 className="text-2xl font-semibold">{auth.user.name}</h1>
-                            <p className="text-sm text-muted-foreground">Teacher</p>
+                            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">{auth.user.name}</h1>
+                            <p className="text-sm font-medium text-muted-foreground mt-1">Teacher Dashboard</p>
                         </div>
-                        <Badge variant="secondary" className="gap-1">
+                        <Badge variant="secondary" className="gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 border-blue-300 dark:border-blue-800">
                             <BookOpen className="h-4 w-4" />
                             Assigned modules: {modules.length}
                         </Badge>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                        <Button size="sm" className="gap-1" onClick={() => scrollToSection('teacher-modules')}>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                        <Button size="sm" className="gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onClick={() => scrollToSection('teacher-modules')}>
                             <Users className="h-4 w-4" /> Grade now
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
+                        <Button size="sm" variant="outline" className="hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950 transition-all duration-300" onClick={() => window.location.reload()}>
                             <Clock3 className="mr-2 h-4 w-4" /> Refresh
                         </Button>
                     </div>
@@ -125,47 +125,47 @@ export default function TeacherDashboard() {
 
                 {/* Quick Stats */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <Card className="overflow-hidden border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white shadow-md dark:border-blue-900 dark:from-blue-950 dark:to-slate-900">
-                        <CardContent className="p-4">
+                    <Card className="overflow-hidden border-2 border-blue-300/50 bg-gradient-to-br from-blue-50 via-white to-blue-50/50 shadow-xl shadow-blue-500/10 dark:border-blue-800/50 dark:from-blue-950/50 dark:to-slate-900 dark:shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <CardContent className="p-5">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-blue-500 p-2.5 shadow-lg">
-                                    <BookOpen className="h-5 w-5 text-white" />
+                                <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-3 shadow-lg">
+                                    <BookOpen className="h-6 w-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold">{modules.length}</p>
-                                    <p className="text-xs text-muted-foreground">Assigned Modules</p>
+                                    <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">{modules.length}</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Assigned Modules</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white shadow-md dark:border-emerald-900 dark:from-emerald-950 dark:to-slate-900">
-                        <CardContent className="p-4">
+                    <Card className="overflow-hidden border-2 border-emerald-300/50 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 shadow-xl shadow-emerald-500/10 dark:border-emerald-800/50 dark:from-emerald-950/50 dark:to-slate-900 dark:shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-700 animation-delay-2000">
+                        <CardContent className="p-5">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-emerald-500 p-2.5 shadow-lg">
-                                    <Users className="h-5 w-5 text-white" />
+                                <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 shadow-lg">
+                                    <Users className="h-6 w-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold">
+                                    <p className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
                                         {modules.reduce((sum, m) => sum + (m.students?.length || 0), 0)}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">Total Students</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Total Students</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white shadow-md dark:border-purple-900 dark:from-purple-950 dark:to-slate-900">
-                        <CardContent className="p-4">
+                    <Card className="overflow-hidden border-2 border-purple-300/50 bg-gradient-to-br from-purple-50 via-white to-purple-50/50 shadow-xl shadow-purple-500/10 dark:border-purple-800/50 dark:from-purple-950/50 dark:to-slate-900 dark:shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-900 animation-delay-4000">
+                        <CardContent className="p-5">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-purple-500 p-2.5 shadow-lg">
-                                    <CheckCircle2 className="h-5 w-5 text-white" />
+                                <div className="rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
+                                    <CheckCircle2 className="h-6 w-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold">
+                                    <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400">
                                         {modules.reduce((sum, m) => sum + (m.students?.filter(s => s.pivot?.result).length || 0), 0)}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">Graded</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Graded</p>
                                 </div>
                             </div>
                         </CardContent>
