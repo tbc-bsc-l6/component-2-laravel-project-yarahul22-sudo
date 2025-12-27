@@ -13,6 +13,33 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Teacher grading routes - must be defined before dashboard route
+    Route::middleware('role:teacher')->group(function () {
+        Route::patch('/enrolments/{enrolment}/result', function (\Illuminate\Http\Request $request, Enrolment $enrolment) {
+            $user = auth()->user();
+
+            // Ensure teacher owns the module
+            if ($enrolment->module->teacher_id !== $user->id) {
+                abort(403);
+            }
+
+            $data = $request->validate([
+                'result' => ['required', 'in:pass,fail'],
+            ]);
+
+            $enrolment->update([
+                'result' => $data['result'],
+                'completed_at' => now(),
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+
+            return back();
+        })->name('enrolments.result');
+    });
+
     Route::get('dashboard', function () {
         $user = auth()->user();
 
@@ -236,7 +263,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return back();
         })->name('modules.store');
 
-        Route::patch('/modules/{module}/toggle', function (Module $module, \Illuminate\Http\Request $request) {
+        Route::match(['patch', 'post'], '/modules/{module}/toggle', function (Module $module, \Illuminate\Http\Request $request) {
             $module->update([
                 'is_available' => ! $module->is_available,
             ]);
@@ -320,29 +347,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             return back();
         })->name('modules.enrol');
-    });
-
-    // Teacher grading routes
-    Route::middleware('role:teacher')->group(function () {
-        Route::patch('/enrolments/{enrolment}/result', function (\Illuminate\Http\Request $request, Enrolment $enrolment) {
-            $user = auth()->user();
-
-            // Ensure teacher owns the module
-            if ($enrolment->module->teacher_id !== $user->id) {
-                abort(403);
-            }
-
-            $data = $request->validate([
-                'result' => ['required', 'in:pass,fail'],
-            ]);
-
-            $enrolment->update([
-                'result' => $data['result'],
-                'completed_at' => now(),
-            ]);
-
-            return back();
-        })->name('enrolments.result');
     });
 });
 

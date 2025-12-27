@@ -63,38 +63,44 @@ export default function TeacherDashboard() {
     };
 
     const markResult = async (enrolmentId: number, result: 'pass' | 'fail') => {
-        const token = document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content');
+        try {
+            const token = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
 
-        if (!token) {
-            alert('Missing CSRF token.');
-            return;
+            if (!token) {
+                alert('Missing CSRF token. Please refresh the page and try again.');
+                return;
+            }
+
+            const url = `/enrolments/${enrolmentId}/result`;
+
+            const res = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ result }),
+            });
+
+            const responseData = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                const message = responseData?.message || `HTTP ${res.status}: Failed to update result`;
+                alert(message);
+                return;
+            }
+
+            // Success - reload to see updated data
+            window.location.reload();
+        } catch (error) {
+            console.error('Error marking result:', error);
+            alert('An error occurred while marking the result. Please try again.');
         }
-
-        const url = `/enrolments/${enrolmentId}/result`;
-
-        const res = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'X-CSRF-TOKEN': token,
-                'X-Requested-With': 'XMLHttpRequest',
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
-            referrer: window.location.href,
-            body: JSON.stringify({ result }),
-        });
-
-        if (!res.ok) {
-            const body = await res.json().catch(() => null);
-            const fallback = `Failed to update result (status ${res.status})`;
-            alert(body?.message ?? fallback);
-            return;
-        }
-
-        window.location.reload();
     };
 
     return (

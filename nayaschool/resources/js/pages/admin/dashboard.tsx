@@ -627,6 +627,12 @@ export default function AdminDashboard() {
                                                             const formData = new FormData(e.currentTarget);
                                                             const role = formData.get('role');
                                                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                            
+                                                            if (!token) {
+                                                                alert('Missing CSRF token. Please refresh the page.');
+                                                                return;
+                                                            }
+                                                            
                                                             fetch(`/admin/users/${student.id}/role`, {
                                                                 method: 'PATCH',
                                                                 credentials: 'same-origin',
@@ -638,8 +644,18 @@ export default function AdminDashboard() {
                                                                 },
                                                                 body: JSON.stringify({ role }),
                                                             })
-                                                            .then(res => res.ok ? window.location.reload() : alert('Failed'))
-                                                            .catch(() => alert('Error'));
+                                                            .then(res => res.json().then(data => ({ ok: res.ok, data })))
+                                                            .then(({ ok, data }) => {
+                                                                if (ok) {
+                                                                    window.location.reload();
+                                                                } else {
+                                                                    alert(data?.message || 'Failed to update role');
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.error('Error:', err);
+                                                                alert('An error occurred. Please try again.');
+                                                            });
                                                         }}
                                                         className="grid gap-3 p-4"
                                                     >
@@ -1073,13 +1089,27 @@ export default function AdminDashboard() {
                                                     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                                                     try {
                                                         const res = await fetch(`/admin/modules/${m.id}/toggle`, {
-                                                            method: 'PATCH',
+                                                            method: 'POST',
                                                             credentials: 'same-origin',
-                                                            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
+                                                            headers: {
+                                                                'X-CSRF-TOKEN': token,
+                                                                'X-Requested-With': 'XMLHttpRequest',
+                                                                'Accept': 'application/json',
+                                                                'Content-Type': 'application/json',
+                                                            },
+                                                            body: JSON.stringify({ _method: 'PATCH' }),
                                                         });
-                                                        if (res.ok) window.location.reload();
-                                                        else alert('Failed to toggle');
-                                                    } catch { alert('Error'); }
+                                                        if (res.ok) {
+                                                            window.location.reload();
+                                                        } else {
+                                                            const text = await res.text();
+                                                            let msg = 'Failed to toggle';
+                                                            try { const json = JSON.parse(text); msg = json?.message || msg; } catch {}
+                                                            alert(msg);
+                                                        }
+                                                    } catch (e) {
+                                                        alert('Error: ' + (e instanceof Error ? e.message : 'Unknown error'));
+                                                    }
                                                 }}
                                             >
                                                 {m.is_available ? (
