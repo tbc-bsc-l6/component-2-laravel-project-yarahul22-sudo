@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Paginate admin modules list for UI (3 per page so pagination shows after 3+ modules)
             $modules = Module::with(['teacher', 'students' => function($query) {
                 $query->select('users.id', 'users.name', 'users.email')
+                    ->whereNull('enrolments.completed_at') // Only load active students
                     ->withPivot('id', 'enrolled_at', 'completed_at', 'result');
             }])
             ->withCount(['students' => function($query) {
@@ -47,14 +48,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->orderBy('name')
                 ->get();
 
+            // Limit students display to prevent overcrowding - show first 9
+            // Sort by ID to maintain creation order (Student 1, 2, 3... not 1, 10, 11...)
             $students = \App\Models\User::whereIn('role', ['student', 'old_student'])
-                ->orderBy('name')
+                ->orderBy('id')
+                ->limit(9)
                 ->get();
+            
+            $totalStudentsCount = \App\Models\User::whereIn('role', ['student', 'old_student'])->count();
 
             return Inertia::render('admin/dashboard', [
                 'modules' => $modulesArr,
                 'teachers' => $teachers,
                 'students' => $students,
+                'totalStudentsCount' => $totalStudentsCount,
             ]);
         }
 
@@ -66,7 +73,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                             ->withPivot('id', 'enrolled_at', 'completed_at', 'result');
                     },
                 ])
-                ->withCount('students')
+                ->withCount([
+                    'students as students_count' => function ($query) {
+                        // Count only active students (not completed) for stats
+                        $query->whereNull('enrolments.completed_at');
+                    },
+                    'students as total_students_count' // Count all students including completed
+                ])
                 ->orderByDesc('id')
                 ->get();
 
@@ -86,6 +99,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->whereNotNull('completed_at')
                 ->orderByDesc('completed_at')
                 ->get();
+
+            $currentEnrolmentsCount = $currentEnrolments->count();
 
             $availableModules = [];
             if ($user->isStudent()) {
@@ -112,7 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'completedEnrolments' => $completedEnrolments,
                 'availableModules' => $availableModules,
                 'canEnrolMore' => $user->isStudent()
-                    && $currentEnrolments->count() < 4,
+                    && $currentEnrolmentsCount < 4,
                 'isOldStudent' => $user->isOldStudent(),
             ]);
         }
@@ -141,7 +156,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return back();
         })->name('teachers.store');
 
-        Route::delete('/teachers/{user}', function (\App\Models\User $user) {
+        Route::delete('/teachers/{user}', function (\App\Models\User $user, \Illuminate\Http\Request $request) {
             if ($user->role !== 'teacher') {
                 abort(403, 'Can only delete teacher accounts');
             }
@@ -150,6 +165,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Module::where('teacher_id', $user->id)->update(['teacher_id' => null]);
             
             $user->delete();
+            
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+            
             return back();
         })->name('teachers.destroy');
 
@@ -160,6 +180,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ]);
 
             $user->update(['role' => $data['role']]);
+            
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+            
             return back();
         })->name('users.change-role');
 
@@ -186,11 +211,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'title' => ['required', 'string'],
                 'description' => ['nullable', 'string'],
                 'max_students' => ['nullable', 'integer', 'min:1', 'max:50'],
+                'teacher_id' => ['nullable', 'exists:users,id'],
             ]);
+
+            // Verify teacher_id is actually a teacher if provided
+            if (!empty($data['teacher_id'])) {
+                $teacher = \App\Models\User::find($data['teacher_id']);
+                if ($teacher && $teacher->role !== 'teacher') {
+                    return back()->withErrors(['teacher_id' => 'Selected user is not a teacher.']);
+                }
+            }
 
             $module = Module::create([
                 ...$data,
                 'max_students' => $data['max_students'] ?? 10,
+                'teacher_id' => $data['teacher_id'] ?? null,
+                'is_available' => true,
             ]);
 
             if ($request->wantsJson()) {
@@ -200,10 +236,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return back();
         })->name('modules.store');
 
-        Route::patch('/modules/{module}/toggle', function (Module $module) {
+        Route::patch('/modules/{module}/toggle', function (Module $module, \Illuminate\Http\Request $request) {
             $module->update([
                 'is_available' => ! $module->is_available,
             ]);
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
 
             return back();
         })->name('modules.toggle');
@@ -213,19 +253,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'teacher_id' => ['nullable', 'exists:users,id'],
             ]);
 
+            $teacherId = $data['teacher_id'] ?? null;
+            if ($teacherId) {
+                $teacher = \App\Models\User::findOrFail($teacherId);
+                if ($teacher->role !== 'teacher') {
+                    abort(422, 'Selected user is not a teacher.');
+                }
+            }
+
             $module->update([
-                'teacher_id' => $data['teacher_id'] ?? null,
+                'teacher_id' => $teacherId,
             ]);
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
 
             return back();
         })->name('modules.assign-teacher');
 
         Route::delete('/modules/{module}', function (Module $module, \Illuminate\Http\Request $request) {
-            // allow deletion for admins; return JSON when requested
-            $module->delete();
+            // archive instead of delete to preserve history
+            $module->update(['is_available' => false]);
 
             if ($request->wantsJson()) {
-                return response()->json(['deleted' => true]);
+                return response()->json(['archived' => true]);
             }
 
             return back();
