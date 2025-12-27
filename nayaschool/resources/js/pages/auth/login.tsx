@@ -24,8 +24,8 @@ export default function Login({
 }: LoginProps) {
     return (
         <AuthLayout
-            title="Welcome back to NayaSchool"
-            description="Choose the account you were given (admin, teacher, or student) and log in to see your tailored dashboard."
+            title="Welcome to Naya School"
+            description="Sign in to access your personalized dashboard - whether you're an administrator, teacher, or student."
         >
             <Head title="Log in" />
 
@@ -88,7 +88,7 @@ export default function Login({
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"

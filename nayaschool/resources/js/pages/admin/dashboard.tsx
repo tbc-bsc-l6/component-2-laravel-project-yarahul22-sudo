@@ -78,6 +78,7 @@ type PageProps = SharedData & {
     modules: Module[] | PagedModules;
     teachers?: Teacher[];
     students?: Student[];
+    totalStudentsCount?: number;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -93,7 +94,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function AdminDashboard() {
     const { props } = usePage<PageProps>();
-    const { modules, auth, teachers = [], students = [] } = props;
+    const { modules, auth, teachers = [], students = [], totalStudentsCount = 0 } = props;
 
     const [modulesState, setModulesState] = useState<Module[]>(() =>
         Array.isArray(modules) ? modules : modules.data ?? [],
@@ -118,6 +119,7 @@ export default function AdminDashboard() {
         title: '',
         description: '',
         max_students: 10,
+        teacher_id: '',
     });
     const [createOpen, setCreateOpen] = useState(false);
     const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
@@ -149,30 +151,30 @@ export default function AdminDashboard() {
             <Head title="Admin Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
                 {/* Welcome Banner */}
-                <div className="rounded-lg border border-slate-200 bg-white/90 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+                <div className="rounded-xl border-2 border-indigo-200/50 bg-white/95 backdrop-blur-sm p-6 shadow-2xl shadow-indigo-500/10 dark:border-indigo-800/50 dark:bg-slate-900/95 dark:shadow-purple-500/20 hover:shadow-indigo-500/20 transition-all duration-500 animate-in fade-in slide-in-from-top-4 duration-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Welcome back, <span className="font-semibold text-foreground">{auth.user.name}</span>
+                            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">Admin Dashboard</h1>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                Welcome back, <span className="font-semibold text-foreground bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{auth.user.name}</span>
                             </p>
                         </div>
-                        <Badge variant="default" className="h-fit px-3 py-1">
-                            <Settings2 className="mr-1 h-3 w-3" />
+                        <Badge variant="default" className="h-fit px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+                            <Settings2 className="mr-1.5 h-4 w-4" />
                             Administrator
                         </Badge>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        <Button size="sm" className="gap-2" onClick={() => setCreateOpen(true)}>
+                    <div className="mt-6 flex flex-wrap gap-2">
+                        <Button size="sm" className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onClick={() => setCreateOpen(true)}>
                             <Plus className="h-4 w-4" /> New Module
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => scrollToSection('admin-teachers')}>
+                        <Button size="sm" variant="outline" className="hover:bg-indigo-50 hover:border-indigo-300 dark:hover:bg-indigo-950 transition-all duration-300" onClick={() => scrollToSection('admin-teachers')}>
                             <GraduationCap className="mr-2 h-4 w-4" /> Teachers
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => scrollToSection('admin-students')}>
+                        <Button size="sm" variant="outline" className="hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-950 transition-all duration-300" onClick={() => scrollToSection('admin-students')}>
                             <Users className="mr-2 h-4 w-4" /> Students
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => scrollToSection('admin-modules')}>
+                        <Button size="sm" variant="outline" className="hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950 transition-all duration-300" onClick={() => scrollToSection('admin-modules')}>
                             <BookOpen className="mr-2 h-4 w-4" /> Modules
                         </Button>
                     </div>
@@ -182,9 +184,9 @@ export default function AdminDashboard() {
                 <div className="grid gap-4 md:grid-cols-3">
                     <Sheet open={createOpen} onOpenChange={setCreateOpen}>
                         <SheetTrigger asChild>
-                            <Card className="group cursor-pointer overflow-hidden border-2 border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50 to-white transition hover:border-emerald-400 hover:shadow-lg dark:border-emerald-900 dark:from-emerald-950 dark:to-slate-900">
+                            <Card className="group cursor-pointer overflow-hidden border-2 border-dashed border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 transition-all duration-300 hover:border-emerald-500 hover:shadow-2xl hover:scale-[1.02] dark:border-emerald-800 dark:from-emerald-950/50 dark:to-slate-900 dark:hover:border-emerald-600 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <CardContent className="flex items-center gap-4 p-6">
-                                    <div className="rounded-xl bg-emerald-500 p-3 shadow-lg transition group-hover:scale-110">
+                                    <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-3 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl group-hover:shadow-emerald-500/50">
                                         <BookOpen className="h-6 w-6 text-white" />
                                     </div>
                                     <div>
@@ -288,6 +290,37 @@ export default function AdminDashboard() {
 
                                 <div>
                                     <label className="mb-1 block text-sm font-medium">
+                                        Assign Teacher (optional)
+                                    </label>
+                                    <select
+                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50"
+                                        value={data.teacher_id}
+                                        onChange={(e) => setData('teacher_id', e.target.value)}
+                                    >
+                                        <option value="">No teacher assigned</option>
+                                        {teachers.map((teacher) => (
+                                            <option key={teacher.id} value={teacher.id}>
+                                                {teacher.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {serverErrors.teacher_id ? (
+                                        <p className="mt-1 text-xs text-destructive">
+                                            {Array.isArray(serverErrors.teacher_id)
+                                                ? serverErrors.teacher_id.join(' ')
+                                                : serverErrors.teacher_id}
+                                        </p>
+                                    ) : errors.teacher_id && (
+                                        <p className="mt-1 text-xs text-destructive">
+                                            {Array.isArray(errors.teacher_id)
+                                                ? errors.teacher_id.join(' ')
+                                                : errors.teacher_id}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium">
                                         Max students (default 10)
                                     </label>
                                     <Input
@@ -368,8 +401,10 @@ export default function AdminDashboard() {
                                     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                                     fetch('/admin/teachers', {
                                         method: 'POST',
+                                        credentials: 'same-origin', // include session cookie for CSRF
                                         headers: {
                                             'X-CSRF-TOKEN': token,
+                                            'X-Requested-With': 'XMLHttpRequest',
                                             'Accept': 'application/json',
                                             'Content-Type': 'application/json',
                                         },
@@ -401,14 +436,14 @@ export default function AdminDashboard() {
                         </SheetContent>
                     </Sheet>
 
-                    <Card className="overflow-hidden border-2 border-slate-200 bg-gradient-to-br from-slate-50 to-white dark:border-slate-700 dark:from-slate-900 dark:to-slate-950">
+                    <Card className="overflow-hidden border-2 border-purple-200/50 bg-gradient-to-br from-purple-50 via-white to-pink-50 shadow-xl shadow-purple-500/10 dark:border-purple-800/50 dark:from-purple-950/50 dark:to-slate-900 dark:shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-700 animation-delay-2000">
                         <CardContent className="flex items-center gap-4 p-6">
-                            <div className="rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 p-3 shadow-lg">
+                            <div className="rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 p-3 shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300">
                                 <Settings2 className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">System Stats</p>
-                                <p className="text-lg font-bold">{teachers.length} Teachers • {students.length} Students</p>
+                                <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400">{teachers.length} Teachers • {students.length} Students</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -448,8 +483,10 @@ export default function AdminDashboard() {
                                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                                             fetch('/admin/teachers', {
                                                 method: 'POST',
+                                                credentials: 'same-origin',
                                                 headers: {
                                                     'X-CSRF-TOKEN': token,
+                                                    'X-Requested-With': 'XMLHttpRequest',
                                                     'Accept': 'application/json',
                                                     'Content-Type': 'application/json',
                                                 },
@@ -516,7 +553,8 @@ export default function AdminDashboard() {
                                                     try {
                                                         const res = await fetch(`/admin/teachers/${teacher.id}`, {
                                                             method: 'DELETE',
-                                                            headers: { 'X-CSRF-TOKEN': token, Accept: 'application/json' },
+                                                            credentials: 'same-origin',
+                                                            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
                                                         });
                                                         if (res.ok) window.location.reload();
                                                         else alert('Failed to delete teacher');
@@ -542,7 +580,11 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-semibold">Students & Users</h2>
-                                    <p className="text-sm text-muted-foreground">Manage student accounts and roles</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Manage student accounts and roles {totalStudentsCount > students.length && (
+                                            <span className="text-xs">• Showing {students.length} of {totalStudentsCount}</span>
+                                        )}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -587,8 +629,10 @@ export default function AdminDashboard() {
                                                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                                                             fetch(`/admin/users/${student.id}/role`, {
                                                                 method: 'PATCH',
+                                                                credentials: 'same-origin',
                                                                 headers: {
                                                                     'X-CSRF-TOKEN': token,
+                                                                    'X-Requested-With': 'XMLHttpRequest',
                                                                     'Accept': 'application/json',
                                                                     'Content-Type': 'application/json',
                                                                 },
@@ -921,7 +965,8 @@ export default function AdminDashboard() {
                                                                         try {
                                                                             const res = await fetch(`/admin/enrolments/${student.pivot.id}`, {
                                                                                 method: 'DELETE',
-                                                                                headers: { 'X-CSRF-TOKEN': token, Accept: 'application/json' },
+                                                                                credentials: 'same-origin',
+                                                                                headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
                                                                             });
                                                                             
                                                                             if (res.ok) {
@@ -988,8 +1033,10 @@ export default function AdminDashboard() {
                                                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                                                             fetch(`/admin/modules/${m.id}/teacher`, {
                                                                 method: 'PATCH',
+                                                                credentials: 'same-origin',
                                                                 headers: {
                                                                     'X-CSRF-TOKEN': token,
+                                                                    'X-Requested-With': 'XMLHttpRequest',
                                                                     'Accept': 'application/json',
                                                                     'Content-Type': 'application/json',
                                                                 },
@@ -1027,7 +1074,8 @@ export default function AdminDashboard() {
                                                     try {
                                                         const res = await fetch(`/admin/modules/${m.id}/toggle`, {
                                                             method: 'PATCH',
-                                                            headers: { 'X-CSRF-TOKEN': token, Accept: 'application/json' },
+                                                            credentials: 'same-origin',
+                                                            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
                                                         });
                                                         if (res.ok) window.location.reload();
                                                         else alert('Failed to toggle');
@@ -1047,41 +1095,6 @@ export default function AdminDashboard() {
                                                 )}
                                             </Button>
 
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                onClick={async () => {
-                                                        if (!window.confirm('Delete this module? This action cannot be undone.')) return;
-                                                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                        try {
-                                                            const res = await fetch(`/admin/modules/${m.id}`, {
-                                                                method: 'DELETE',
-                                                                headers: {
-                                                                    'X-CSRF-TOKEN': token,
-                                                                    Accept: 'application/json',
-                                                                },
-                                                                credentials: 'same-origin',
-                                                            });
-
-                                                            if (!res.ok) {
-                                                                const body = await res.json().catch(() => null);
-                                                                alert('Failed to delete module: ' + (body?.message ?? res.statusText));
-                                                                return;
-                                                            }
-
-                                                            // reload to update list
-                                                            window.location.reload();
-                                                        } catch (err) {
-                                                            // eslint-disable-next-line no-console
-                                                            console.error('delete module error', err);
-                                                            alert('Error deleting module');
-                                                        }
-                                                    }}
-                                                >
-                                                    <Trash2 className="h-3 w-3" />
-                                                    Delete
-                                                </Button>
                                             </div>
                                     </CardFooter>
                                 </Card>
