@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem, SharedData } from '@/types';
@@ -49,17 +50,22 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function StudentDashboard() {
-    const { props } = usePage<PageProps>();
-    const {
-        currentEnrolments,
-        completedEnrolments,
-        availableModules,
-        canEnrolMore,
-        isOldStudent,
-        auth,
-    } = props;
+    try {
+        const { props } = usePage<PageProps>();
+        const {
+            currentEnrolments = [],
+            completedEnrolments = [],
+            availableModules = [],
+            canEnrolMore = false,
+            isOldStudent = false,
+            auth,
+        } = props || {};
 
-    const { post } = useForm({});
+        if (!auth?.user) {
+            return <div className="p-8">Loading...</div>;
+        }
+
+        const { post } = useForm({});
 
     const scrollToSection = (id: string) => {
         const el = document.getElementById(id);
@@ -329,5 +335,16 @@ export default function StudentDashboard() {
                 )}
             </div>
         </AppLayout>
-    );
+        );
+    } catch (error) {
+        console.error('Student Dashboard Error:', error);
+        return (
+            <div className="flex min-h-screen items-center justify-center p-8">
+                <div className="rounded-lg border border-red-300 bg-red-50 p-6 text-red-800">
+                    <h2 className="mb-2 text-lg font-semibold">Dashboard Error</h2>
+                    <p className="text-sm">{String(error)}</p>
+                </div>
+            </div>
+        );
+    }
 }

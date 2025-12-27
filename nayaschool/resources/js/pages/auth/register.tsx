@@ -13,8 +13,8 @@ import AuthLayout from '@/layouts/auth-layout';
 export default function Register() {
     return (
         <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
+            title="Join Naya School"
+            description="Register as a student to start your learning journey with us"
         >
             <Head title="Register" />
             <Form
@@ -92,7 +92,7 @@ export default function Register() {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
+                                className="mt-2 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >
