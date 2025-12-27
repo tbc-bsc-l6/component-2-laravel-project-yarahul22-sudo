@@ -112,9 +112,12 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Add some completed enrolments with grades
-        $completed = Enrolment::create([
-            'user_id' => $students[10]->id,
+        // Add some completed enrolments with grades and mark one student as old_student
+        $oldStudent = $students[10];
+        $oldStudent->update(['role' => 'old_student']);
+
+        Enrolment::create([
+            'user_id' => $oldStudent->id,
             'module_id' => $module1->id,
             'enrolled_at' => now()->subDays(60),
             'completed_at' => now()->subDays(10),
