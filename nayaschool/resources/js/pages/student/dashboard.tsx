@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { StudentAnalytics } from '@/components/student-analytics';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
@@ -13,7 +14,9 @@ import {
     Clock3,
     Plus,
     XCircle,
+    TrendingUp,
 } from 'lucide-react';
+import { useState } from 'react';
 
 type Module = {
     id: number;
@@ -60,6 +63,8 @@ export default function StudentDashboard() {
             isOldStudent = false,
             auth,
         } = props || {};
+
+        const [showAnalytics, setShowAnalytics] = useState(false);
 
         if (!auth?.user) {
             return <div className="p-8">Loading...</div>;
@@ -111,6 +116,14 @@ export default function StudentDashboard() {
                         </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
+                        <Button 
+                          size="sm" 
+                          variant={showAnalytics ? "default" : "outline"}
+                          className={showAnalytics ? "gap-2 bg-blue-600 hover:bg-blue-700" : ""}
+                          onClick={() => setShowAnalytics(!showAnalytics)}
+                        >
+                            <TrendingUp className="h-4 w-4" /> Analytics
+                        </Button>
                         {!isOldStudent && (
                             <Button size="sm" className="gap-2" onClick={() => scrollToSection('student-available')}>
                                 <Plus className="h-4 w-4" /> Enrol now
@@ -126,6 +139,22 @@ export default function StudentDashboard() {
                         </Button>
                     </div>
                 </div>
+
+                {/* Analytics Section */}
+                {showAnalytics && (
+                    <div className="space-y-4 mb-8">
+                        <div className="flex items-center gap-2">
+                            <div className="rounded-lg bg-blue-500/10 p-2">
+                                <TrendingUp className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold">Your Performance Analytics</h2>
+                                <p className="text-sm text-muted-foreground">Track your academic progress</p>
+                            </div>
+                        </div>
+                        <StudentAnalytics />
+                    </div>
+                )}
 
                 {/* Quick Stats */}
                 {!isOldStudent && (

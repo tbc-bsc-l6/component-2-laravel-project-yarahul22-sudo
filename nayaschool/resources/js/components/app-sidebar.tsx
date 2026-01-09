@@ -14,7 +14,7 @@ import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
-import AppLogo from './app-logo';
+import NayaschoolLogo from './nayaschool-logo';
 
 const mainNavItems: NavItem[] = [
     {
@@ -45,7 +45,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href={dashboard()} prefetch>
-                                <AppLogo />
+                                <NayaschoolLogo />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

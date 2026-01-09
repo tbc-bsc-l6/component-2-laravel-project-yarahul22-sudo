@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Models\Enrolment;
 use App\Models\Module;
 use Illuminate\Support\Facades\Route;
@@ -347,6 +348,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             return back();
         })->name('modules.enrol');
+    });
+
+    // Analytics routes
+    Route::prefix('api')->group(function () {
+        Route::get('/analytics/admin', [AnalyticsController::class, 'adminDashboard'])
+            ->middleware('role:admin')
+            ->name('analytics.admin');
+        
+        Route::get('/analytics/teacher', [AnalyticsController::class, 'teacherDashboard'])
+            ->middleware('role:teacher')
+            ->name('analytics.teacher');
+        
+        Route::get('/analytics/student', [AnalyticsController::class, 'studentDashboard'])
+            ->middleware('role:student')
+            ->name('analytics.student');
     });
 });
 

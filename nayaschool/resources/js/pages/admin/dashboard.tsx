@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { AdminAnalytics } from '@/components/admin-analytics';
 import {
     Card,
     CardContent,
@@ -12,7 +13,7 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { SharedData } from '@/types';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     Sheet,
     SheetContent,
@@ -23,7 +24,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useEffect, useState } from 'react';
-import { Plus, Users, BookOpen, GraduationCap, Settings2, Trash2, UserMinus, Archive, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Users, BookOpen, GraduationCap, Settings2, Trash2, UserMinus, Archive, CheckCircle2, XCircle, TrendingUp } from 'lucide-react';
 
 type Module = {
     id: number;
@@ -100,6 +101,8 @@ export default function AdminDashboard() {
         Array.isArray(modules) ? modules : modules.data ?? [],
     );
 
+    const [showAnalytics, setShowAnalytics] = useState(false);
+
     // Keep modulesState in sync when Inertia props change (paging/navigation)
     useEffect(() => {
         if (!Array.isArray(modules) && modules.data) {
@@ -121,8 +124,39 @@ export default function AdminDashboard() {
         max_students: 10,
         teacher_id: '',
     });
+    const {
+        data: teacherData,
+        setData: setTeacherData,
+        reset: resetTeacher,
+        post: postTeacher,
+        processing: teacherProcessing,
+        errors: teacherErrors,
+    } = useForm({
+        name: '',
+        email: '',
+        password: '',
+    });
+    const {
+        data: roleData,
+        setData: setRoleData,
+        reset: resetRole,
+        patch: patchRole,
+        processing: roleProcessing,
+    } = useForm({
+        role: '',
+    });
     const [createOpen, setCreateOpen] = useState(false);
     const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
+    const submitTeacher = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        postTeacher('/admin/teachers', {
+            preserveScroll: true,
+            onSuccess: () => {
+                resetTeacher();
+                router.reload({ only: ['teachers'] });
+            },
+        });
+    };
 
     const scrollToSection = (id: string) => {
         const el = document.getElementById(id);
@@ -167,6 +201,14 @@ export default function AdminDashboard() {
                     <div className="mt-6 flex flex-wrap gap-2">
                         <Button size="sm" className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onClick={() => setCreateOpen(true)}>
                             <Plus className="h-4 w-4" /> New Module
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant={showAnalytics ? "default" : "outline"}
+                          className={showAnalytics ? "gap-2 bg-blue-600 hover:bg-blue-700" : "hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950"}
+                          onClick={() => setShowAnalytics(!showAnalytics)}
+                        >
+                            <TrendingUp className="h-4 w-4" /> Analytics
                         </Button>
                         <Button size="sm" variant="outline" className="hover:bg-indigo-50 hover:border-indigo-300 dark:hover:bg-indigo-950 transition-all duration-300" onClick={() => scrollToSection('admin-teachers')}>
                             <GraduationCap className="mr-2 h-4 w-4" /> Teachers
@@ -395,43 +437,56 @@ export default function AdminDashboard() {
                                 </SheetDescription>
                             </SheetHeader>
                             <form 
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const formData = new FormData(e.currentTarget);
-                                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                    fetch('/admin/teachers', {
-                                        method: 'POST',
-                                        credentials: 'same-origin', // include session cookie for CSRF
-                                        headers: {
-                                            'X-CSRF-TOKEN': token,
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            name: formData.get('name'),
-                                            email: formData.get('email'),
-                                            password: formData.get('password'),
-                                        }),
-                                    })
-                                    .then(res => res.ok ? window.location.reload() : res.json().then(body => alert(body.message || 'Failed')))
-                                    .catch(() => alert('Error creating teacher'));
-                                }}
+                                onSubmit={submitTeacher}
                                 className="grid gap-3 p-4"
                             >
                                 <div>
                                     <label className="mb-1 block text-sm font-medium">Name</label>
-                                    <Input name="name" required />
+                                    <Input
+                                        name="name"
+                                        value={teacherData.name}
+                                        onChange={(e) => setTeacherData('name', e.target.value)}
+                                        required
+                                    />
+                                    {teacherErrors.name && (
+                                        <p className="mt-1 text-xs text-destructive">
+                                            {Array.isArray(teacherErrors.name) ? teacherErrors.name.join(' ') : teacherErrors.name}
+                                        </p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium">Email</label>
-                                    <Input name="email" type="email" required />
+                                    <Input
+                                        name="email"
+                                        type="email"
+                                        value={teacherData.email}
+                                        onChange={(e) => setTeacherData('email', e.target.value)}
+                                        required
+                                    />
+                                    {teacherErrors.email && (
+                                        <p className="mt-1 text-xs text-destructive">
+                                            {Array.isArray(teacherErrors.email) ? teacherErrors.email.join(' ') : teacherErrors.email}
+                                        </p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium">Password</label>
-                                    <Input name="password" type="password" required />
+                                    <Input
+                                        name="password"
+                                        type="password"
+                                        value={teacherData.password}
+                                        onChange={(e) => setTeacherData('password', e.target.value)}
+                                        required
+                                    />
+                                    {teacherErrors.password && (
+                                        <p className="mt-1 text-xs text-destructive">
+                                            {Array.isArray(teacherErrors.password) ? teacherErrors.password.join(' ') : teacherErrors.password}
+                                        </p>
+                                    )}
                                 </div>
-                                <Button type="submit" className="w-full">Create Teacher</Button>
+                                <Button type="submit" className="w-full" disabled={teacherProcessing}>
+                                    {teacherProcessing ? 'Creating...' : 'Create Teacher'}
+                                </Button>
                             </form>
                         </SheetContent>
                     </Sheet>
@@ -464,7 +519,7 @@ export default function AdminDashboard() {
                             </div>
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button size="sm" className="gap-2">
+                                    <Button size="sm" className="gap-2 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                                         <Plus className="h-4 w-4" />
                                         Add Teacher
                                     </Button>
@@ -477,43 +532,56 @@ export default function AdminDashboard() {
                                         </SheetDescription>
                                     </SheetHeader>
                                     <form 
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            const formData = new FormData(e.currentTarget);
-                                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                            fetch('/admin/teachers', {
-                                                method: 'POST',
-                                                credentials: 'same-origin',
-                                                headers: {
-                                                    'X-CSRF-TOKEN': token,
-                                                    'X-Requested-With': 'XMLHttpRequest',
-                                                    'Accept': 'application/json',
-                                                    'Content-Type': 'application/json',
-                                                },
-                                                body: JSON.stringify({
-                                                    name: formData.get('name'),
-                                                    email: formData.get('email'),
-                                                    password: formData.get('password'),
-                                                }),
-                                            })
-                                            .then(res => res.ok ? window.location.reload() : res.json().then(body => alert(body.message || 'Failed')))
-                                            .catch(() => alert('Error creating teacher'));
-                                        }}
+                                        onSubmit={submitTeacher}
                                         className="grid gap-3 p-4"
                                     >
                                         <div>
                                             <label className="mb-1 block text-sm font-medium">Name</label>
-                                            <Input name="name" required />
+                                            <Input
+                                                name="name"
+                                                value={teacherData.name}
+                                                onChange={(e) => setTeacherData('name', e.target.value)}
+                                                required
+                                            />
+                                            {teacherErrors.name && (
+                                                <p className="mt-1 text-xs text-destructive">
+                                                    {Array.isArray(teacherErrors.name) ? teacherErrors.name.join(' ') : teacherErrors.name}
+                                                </p>
+                                            )}
                                         </div>
                                         <div>
                                             <label className="mb-1 block text-sm font-medium">Email</label>
-                                            <Input name="email" type="email" required />
+                                            <Input
+                                                name="email"
+                                                type="email"
+                                                value={teacherData.email}
+                                                onChange={(e) => setTeacherData('email', e.target.value)}
+                                                required
+                                            />
+                                            {teacherErrors.email && (
+                                                <p className="mt-1 text-xs text-destructive">
+                                                    {Array.isArray(teacherErrors.email) ? teacherErrors.email.join(' ') : teacherErrors.email}
+                                                </p>
+                                            )}
                                         </div>
                                         <div>
                                             <label className="mb-1 block text-sm font-medium">Password</label>
-                                            <Input name="password" type="password" required />
+                                            <Input
+                                                name="password"
+                                                type="password"
+                                                value={teacherData.password}
+                                                onChange={(e) => setTeacherData('password', e.target.value)}
+                                                required
+                                            />
+                                            {teacherErrors.password && (
+                                                <p className="mt-1 text-xs text-destructive">
+                                                    {Array.isArray(teacherErrors.password) ? teacherErrors.password.join(' ') : teacherErrors.password}
+                                                </p>
+                                            )}
                                         </div>
-                                        <Button type="submit">Create Teacher</Button>
+                                        <Button type="submit" disabled={teacherProcessing}>
+                                            {teacherProcessing ? 'Creating...' : 'Create Teacher'}
+                                        </Button>
                                     </form>
                                 </SheetContent>
                             </Sheet>
@@ -549,16 +617,7 @@ export default function AdminDashboard() {
                                                 className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
                                                 onClick={async () => {
                                                     if (!confirm(`Delete teacher ${teacher.name}?`)) return;
-                                                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                    try {
-                                                        const res = await fetch(`/admin/teachers/${teacher.id}`, {
-                                                            method: 'DELETE',
-                                                            credentials: 'same-origin',
-                                                            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
-                                                        });
-                                                        if (res.ok) window.location.reload();
-                                                        else alert('Failed to delete teacher');
-                                                    } catch { alert('Error deleting teacher'); }
+                                                    router.delete(`/admin/teachers/${teacher.id}`, { preserveScroll: true });
                                                 }}
                                             >
                                                 <Trash2 className="h-3 w-3" />
@@ -609,7 +668,7 @@ export default function AdminDashboard() {
                                         <CardFooter className="border-t border-slate-200 bg-slate-50/60 pt-3 dark:border-slate-800 dark:bg-slate-900/40">
                                             <Sheet>
                                                 <SheetTrigger asChild>
-                                                    <Button size="sm" variant="outline" className="w-full gap-2">
+                                                    <Button size="sm" className="w-full gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                                                         <Settings2 className="h-3 w-3" />
                                                         Change Role
                                                     </Button>
@@ -624,37 +683,11 @@ export default function AdminDashboard() {
                                                     <form
                                                         onSubmit={(e) => {
                                                             e.preventDefault();
-                                                            const formData = new FormData(e.currentTarget);
-                                                            const role = formData.get('role');
-                                                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                            
-                                                            if (!token) {
-                                                                alert('Missing CSRF token. Please refresh the page.');
-                                                                return;
-                                                            }
-                                                            
-                                                            fetch(`/admin/users/${student.id}/role`, {
-                                                                method: 'PATCH',
-                                                                credentials: 'same-origin',
-                                                                headers: {
-                                                                    'X-CSRF-TOKEN': token,
-                                                                    'X-Requested-With': 'XMLHttpRequest',
-                                                                    'Accept': 'application/json',
-                                                                    'Content-Type': 'application/json',
+                                                            patchRole(`/admin/users/${student.id}/role`, {
+                                                                preserveScroll: true,
+                                                                onSuccess: () => {
+                                                                    resetRole();
                                                                 },
-                                                                body: JSON.stringify({ role }),
-                                                            })
-                                                            .then(res => res.json().then(data => ({ ok: res.ok, data })))
-                                                            .then(({ ok, data }) => {
-                                                                if (ok) {
-                                                                    window.location.reload();
-                                                                } else {
-                                                                    alert(data?.message || 'Failed to update role');
-                                                                }
-                                                            })
-                                                            .catch(err => {
-                                                                console.error('Error:', err);
-                                                                alert('An error occurred. Please try again.');
                                                             });
                                                         }}
                                                         className="grid gap-3 p-4"
@@ -664,7 +697,8 @@ export default function AdminDashboard() {
                                                             <select 
                                                                 name="role" 
                                                                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                                                defaultValue={student.role}
+                                                                value={roleData.role || student.role}
+                                                                onChange={(e) => setRoleData('role', e.target.value)}
                                                             >
                                                                 <option value="student">Student</option>
                                                                 <option value="old_student">Old Student</option>
@@ -672,7 +706,9 @@ export default function AdminDashboard() {
                                                                 <option value="admin">Admin</option>
                                                             </select>
                                                         </div>
-                                                        <Button type="submit">Update Role</Button>
+                                                        <Button type="submit" disabled={roleProcessing}>
+                                                            {roleProcessing ? 'Updating...' : 'Update Role'}
+                                                        </Button>
                                                     </form>
                                                 </SheetContent>
                                             </Sheet>
@@ -682,6 +718,22 @@ export default function AdminDashboard() {
                             )}
                         </div>
                     </section>
+
+                    {/* Analytics Section */}
+                    {showAnalytics && (
+                        <section className="mb-8">
+                            <div className="mb-4 flex items-center gap-2">
+                                <div className="rounded-lg bg-blue-500/10 p-2">
+                                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-semibold">Analytics Dashboard</h2>
+                                    <p className="text-sm text-muted-foreground">Performance metrics and statistics</p>
+                                </div>
+                            </div>
+                            <AdminAnalytics />
+                        </section>
+                    )}
 
                     <section id="admin-modules">
                         <div className="mb-4 flex items-center justify-between">
@@ -696,7 +748,7 @@ export default function AdminDashboard() {
                             </div>
                             <Sheet open={createOpen} onOpenChange={setCreateOpen}>
                                 <SheetTrigger asChild>
-                                    <Button onClick={() => setCreateOpen(true)} className="gap-2">
+                                    <Button onClick={() => setCreateOpen(true)} className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                                         <Plus className="h-4 w-4" />
                                         New Module
                                     </Button>

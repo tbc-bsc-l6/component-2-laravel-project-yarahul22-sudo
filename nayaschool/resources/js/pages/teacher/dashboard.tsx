@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { TeacherAnalytics } from '@/components/teacher-analytics';
 import {
     Card,
     CardContent,
@@ -17,7 +18,10 @@ import {
     Clock3,
     Users,
     XCircle,
+    TrendingUp,
 } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { useState } from 'react';
 
 type Student = {
     id: number;
@@ -57,6 +61,8 @@ export default function TeacherDashboard() {
     const { props } = usePage<PageProps>();
     const { modules, auth } = props;
 
+    const [showAnalytics, setShowAnalytics] = useState(false);
+
     const scrollToSection = (id: string) => {
         const el = document.getElementById(id);
         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -73,30 +79,13 @@ export default function TeacherDashboard() {
                 return;
             }
 
-            const url = `/enrolments/${enrolmentId}/result`;
-
-            const res = await fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    'X-CSRF-TOKEN': token,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
+            router.patch(`/enrolments/${enrolmentId}/result`, { result }, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    const message = (errors as any)?.message ?? 'Failed to update result';
+                    alert(typeof message === 'string' ? message : 'Failed to update result');
                 },
-                credentials: 'same-origin',
-                body: JSON.stringify({ result }),
             });
-
-            const responseData = await res.json().catch(() => null);
-
-            if (!res.ok) {
-                const message = responseData?.message || `HTTP ${res.status}: Failed to update result`;
-                alert(message);
-                return;
-            }
-
-            // Success - reload to see updated data
-            window.location.reload();
         } catch (error) {
             console.error('Error marking result:', error);
             alert('An error occurred while marking the result. Please try again.');
@@ -120,6 +109,13 @@ export default function TeacherDashboard() {
                         </Badge>
                     </div>
                     <div className="mt-5 flex flex-wrap gap-2">
+                        <Button 
+                          size="sm" 
+                          className={showAnalytics ? "gap-1.5 bg-blue-600 hover:bg-blue-700 text-white" : "gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-105"}
+                          onClick={() => setShowAnalytics(!showAnalytics)}
+                        >
+                            <TrendingUp className="h-4 w-4" /> Analytics
+                        </Button>
                         <Button size="sm" className="gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onClick={() => scrollToSection('teacher-modules')}>
                             <Users className="h-4 w-4" /> Grade now
                         </Button>
@@ -177,6 +173,22 @@ export default function TeacherDashboard() {
                         </CardContent>
                     </Card>
                 </div>
+
+                {/* Analytics Section */}
+                {showAnalytics && (
+                    <div className="space-y-4 mb-8">
+                        <div className="flex items-center gap-2">
+                            <div className="rounded-lg bg-blue-500/10 p-2">
+                                <TrendingUp className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold">Analytics Dashboard</h2>
+                                <p className="text-sm text-muted-foreground">Your teaching performance metrics</p>
+                            </div>
+                        </div>
+                        <TeacherAnalytics />
+                    </div>
+                )}
 
                 <div id="teacher-modules" className="grid grid-cols-1 gap-4">
                     <section className="space-y-4">
