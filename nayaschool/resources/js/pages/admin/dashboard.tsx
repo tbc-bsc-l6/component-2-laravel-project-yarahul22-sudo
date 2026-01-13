@@ -1077,6 +1077,10 @@ export default function AdminDashboard() {
                                                                         }
                                                                         
                                                                         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                                        if (!token) {
+                                                                            alert('Security token missing. Please refresh the page.');
+                                                                            return;
+                                                                        }
                                                                         try {
                                                                             const res = await fetch(`/admin/enrolments/${student.pivot.id}`, {
                                                                                 method: 'DELETE',
@@ -1146,6 +1150,10 @@ export default function AdminDashboard() {
                                                             const formData = new FormData(e.currentTarget);
                                                             const teacherId = formData.get('teacher_id');
                                                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                            if (!token) {
+                                                                alert('Security token missing. Please refresh the page.');
+                                                                return;
+                                                            }
                                                             fetch(`/admin/modules/${m.id}/teacher`, {
                                                                 method: 'PATCH',
                                                                 credentials: 'same-origin',
@@ -1186,6 +1194,10 @@ export default function AdminDashboard() {
                                                 className="gap-1"
                                                 onClick={async () => {
                                                     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                    if (!token) {
+                                                        alert('Security token missing. Please refresh the page.');
+                                                        return;
+                                                    }
                                                     try {
                                                         const res = await fetch(`/admin/modules/${m.id}/toggle`, {
                                                             method: 'POST',
