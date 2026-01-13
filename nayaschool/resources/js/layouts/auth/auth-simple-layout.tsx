@@ -15,12 +15,15 @@ export default function AuthSimpleLayout({
     description,
 }: PropsWithChildren<AuthLayoutProps>) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950 p-6 md:p-10 relative overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
-            <div className="absolute top-0 left-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-            <div className="absolute top-0 right-1/4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-            <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-white dark:bg-slate-950 p-6 md:p-10 relative overflow-hidden">
+            {/* Smooth gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-transparent to-purple-50 dark:from-indigo-950/40 dark:via-slate-950 dark:to-purple-950/40" />
+            
+            {/* Animated blob background elements */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-blob" />
+            <div className="absolute top-1/3 right-0 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-blob animation-delay-2000" />
+            <div className="absolute -bottom-16 left-1/2 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-blob animation-delay-4000" />
+            <div className="absolute top-1/2 -left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-6000" />
             
             <div className="w-full max-w-sm relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
                 <div className="flex flex-col gap-8">

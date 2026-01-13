@@ -1,6 +1,6 @@
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -11,6 +11,14 @@ export default function Welcome({
     canRegister?: boolean;
 }) {
     const { auth } = usePage<SharedData>().props;
+
+    const handleCardClick = (action: string) => {
+        if (!auth.user) {
+            router.visit(register());
+        } else {
+            router.visit(dashboard());
+        }
+    };
 
     return (
         <>
@@ -64,7 +72,9 @@ export default function Welcome({
                                 Get started with the features below.
                             </p>
                             <ul className="mb-6 flex flex-col gap-4 lg:mb-8">
-                                <li className="group relative flex items-center gap-4 rounded-xl border border-indigo-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 dark:border-indigo-800/50 dark:from-blue-950/30 dark:to-indigo-950/30 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+                                <li 
+                                    onClick={() => handleCardClick('modules')}
+                                    className="group relative flex items-center gap-4 rounded-xl border border-indigo-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 dark:border-indigo-800/50 dark:from-blue-950/30 dark:to-indigo-950/30 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                                     <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/50 group-hover:scale-110 transition-transform duration-300">
                                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -75,7 +85,9 @@ export default function Welcome({
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Enroll in up to 4 modules at a time</p>
                                     </div>
                                 </li>
-                                <li className="group relative flex items-center gap-4 rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-5 dark:border-green-800/50 dark:from-green-950/30 dark:to-emerald-950/30 hover:shadow-lg hover:shadow-green-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+                                <li 
+                                    onClick={() => handleCardClick('progress')}
+                                    className="group relative flex items-center gap-4 rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-5 dark:border-green-800/50 dark:from-green-950/30 dark:to-emerald-950/30 hover:shadow-lg hover:shadow-green-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                                     <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/50 group-hover:scale-110 transition-transform duration-300">
                                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -86,7 +98,9 @@ export default function Welcome({
                                         <p className="text-sm text-gray-600 dark:text-gray-400">View completion history with pass/fail status</p>
                                     </div>
                                 </li>
-                                <li className="group relative flex items-center gap-4 rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-5 dark:border-purple-800/50 dark:from-purple-950/30 dark:to-pink-950/30 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+                                <li 
+                                    onClick={() => handleCardClick('teachers')}
+                                    className="group relative flex items-center gap-4 rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-5 dark:border-purple-800/50 dark:from-purple-950/30 dark:to-pink-950/30 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                                     <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50 group-hover:scale-110 transition-transform duration-300">
                                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
