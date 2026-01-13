@@ -185,12 +185,12 @@ export default function AdminDashboard() {
             <Head title="Admin Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
                 {/* Welcome Banner */}
-                <div className="rounded-xl border-2 border-indigo-200/50 bg-white/95 backdrop-blur-sm p-6 shadow-2xl shadow-indigo-500/10 dark:border-indigo-800/50 dark:bg-slate-900/95 dark:shadow-purple-500/20 hover:shadow-indigo-500/20 transition-all duration-500 animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="rounded-xl border-2 border-indigo-200/50 bg-white/95 backdrop-blur-sm p-6 shadow-2xl shadow-indigo-500/10 dark:border-indigo-800/50 dark:bg-slate-900/95 dark:shadow-purple-500/20 hover:shadow-indigo-500/20 transition-all duration-500 animate-in fade-in slide-in-from-top-4">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">Admin Dashboard</h1>
                             <p className="mt-2 text-sm text-muted-foreground">
-                                Welcome back, <span className="font-semibold text-foreground bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{auth.user.name}</span>
+                                Welcome back, <span className="font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{auth.user.name}</span>
                             </p>
                         </div>
                         <Badge variant="default" className="h-fit px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
                 <div className="grid gap-4 md:grid-cols-3">
                     <Sheet open={createOpen} onOpenChange={setCreateOpen}>
                         <SheetTrigger asChild>
-                            <Card className="group cursor-pointer overflow-hidden border-2 border-dashed border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 transition-all duration-300 hover:border-emerald-500 hover:shadow-2xl hover:scale-[1.02] dark:border-emerald-800 dark:from-emerald-950/50 dark:to-slate-900 dark:hover:border-emerald-600 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <Card className="group cursor-pointer overflow-hidden border-2 border-dashed border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 transition-all duration-300 hover:border-emerald-500 hover:shadow-2xl hover:scale-[1.02] dark:border-emerald-800 dark:from-emerald-950/50 dark:to-slate-900 dark:hover:border-emerald-600 animate-in fade-in slide-in-from-bottom-4">
                                 <CardContent className="flex items-center gap-4 p-6">
                                     <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-3 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl group-hover:shadow-emerald-500/50">
                                         <BookOpen className="h-6 w-6 text-white" />
@@ -491,7 +491,7 @@ export default function AdminDashboard() {
                         </SheetContent>
                     </Sheet>
 
-                    <Card className="overflow-hidden border-2 border-purple-200/50 bg-gradient-to-br from-purple-50 via-white to-pink-50 shadow-xl shadow-purple-500/10 dark:border-purple-800/50 dark:from-purple-950/50 dark:to-slate-900 dark:shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-700 animation-delay-2000">
+                    <Card className="overflow-hidden border-2 border-purple-200/50 bg-gradient-to-br from-purple-50 via-white to-pink-50 shadow-xl shadow-purple-500/10 dark:border-purple-800/50 dark:from-purple-950/50 dark:to-slate-900 dark:shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 animation-delay-2000">
                         <CardContent className="flex items-center gap-4 p-6">
                             <div className="rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 p-3 shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300">
                                 <Settings2 className="h-6 w-6 text-white" />
