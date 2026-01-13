@@ -96,7 +96,7 @@ export default function TeacherDashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Teacher Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
-                <div className="rounded-xl border-2 border-blue-200/50 bg-white/95 backdrop-blur-sm p-6 shadow-2xl shadow-blue-500/10 dark:border-blue-800/50 dark:bg-slate-900/95 dark:shadow-blue-500/20 hover:shadow-blue-500/20 transition-all duration-500 animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="rounded-xl border-2 border-blue-200/50 bg-white/95 backdrop-blur-sm p-6 shadow-2xl shadow-blue-500/10 dark:border-blue-800/50 dark:bg-slate-900/95 dark:shadow-blue-500/20 hover:shadow-blue-500/20 transition-all duration-500">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-muted-foreground">Welcome back</p>
@@ -127,7 +127,7 @@ export default function TeacherDashboard() {
 
                 {/* Quick Stats */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <Card className="overflow-hidden border-2 border-blue-300/50 bg-gradient-to-br from-blue-50 via-white to-blue-50/50 shadow-xl shadow-blue-500/10 dark:border-blue-800/50 dark:from-blue-950/50 dark:to-slate-900 dark:shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <Card className="overflow-hidden border-2 border-blue-300/50 bg-gradient-to-br from-blue-50 via-white to-blue-50/50 shadow-xl shadow-blue-500/10 dark:border-blue-800/50 dark:from-blue-950/50 dark:to-slate-900 dark:shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-500">
                         <CardContent className="p-5">
                             <div className="flex items-center gap-3">
                                 <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-3 shadow-lg">
@@ -141,7 +141,7 @@ export default function TeacherDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden border-2 border-emerald-300/50 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 shadow-xl shadow-emerald-500/10 dark:border-emerald-800/50 dark:from-emerald-950/50 dark:to-slate-900 dark:shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-700 animation-delay-2000">
+                    <Card className="overflow-hidden border-2 border-emerald-300/50 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 shadow-xl shadow-emerald-500/10 dark:border-emerald-800/50 dark:from-emerald-950/50 dark:to-slate-900 dark:shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/20 hover:scale-[1.02] transition-all duration-500 animation-delay-2000">
                         <CardContent className="p-5">
                             <div className="flex items-center gap-3">
                                 <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 shadow-lg">
@@ -157,7 +157,7 @@ export default function TeacherDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden border-2 border-purple-300/50 bg-gradient-to-br from-purple-50 via-white to-purple-50/50 shadow-xl shadow-purple-500/10 dark:border-purple-800/50 dark:from-purple-950/50 dark:to-slate-900 dark:shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-900 animation-delay-4000">
+                    <Card className="overflow-hidden border-2 border-purple-300/50 bg-gradient-to-br from-purple-50 via-white to-purple-50/50 shadow-xl shadow-purple-500/10 dark:border-purple-800/50 dark:from-purple-950/50 dark:to-slate-900 dark:shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-500 animation-delay-4000">
                         <CardContent className="p-5">
                             <div className="flex items-center gap-3">
                                 <div className="rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
