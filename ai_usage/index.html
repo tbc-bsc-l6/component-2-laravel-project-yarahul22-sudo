@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI_Usage</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jura:wght@300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+        body {
+            font-family: "Jura", sans-serif;
+            width: 95vw;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .answer_required {
+            font-family: "Montserrat", sans-serif;
+            font-style: italic;
+            font-weight: 500;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* ai page */
+        #ai .card {
+            background-color:#e7e5e4;
+            border-radius: 4px;
+            border: 1px solid #dbdbdb;
+            color: #363636;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        #ai .card-header {
+            background-color: #57534d;
+            border-bottom: 1px solid #dbdbdb;
+            border-radius: 4px 4px 0 0;
+            color: #f1f5f9;
+            font-weight: 700; 
+            font-size: 1rem;            
+            padding: 0.75em 1em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #ai .card-body {
+            padding: 1em 1em;         
+            color: #4a4a4a;
+        }
+        #ai > h1 {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 700;
+            border-bottom: #222525 2px solid;     
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 1.5em;
+        }
+    </style>
+</head>
+<body>
+<section id="ai">
+		<h1>Summary and Reflection on Artificial Intelligence (AI) Usage</h1>
+
+        <div class="card" style="background-color: #fbfbfb; border-radius: 6px; border: 1px solid #dbdbdb; margin-bottom: 1.5rem; padding: 1em;">
+            <div class="card-body">
+                <p>
+                    <span class="answer_required">Please provide a list of the AI prompts used to assist
+                        in the creation of your assignment, along with a brief reflection on how the AI response
+                        helped (or not) your understanding. If you did not use AI, please state "No AI used".
+                    </span>
+                </p>
+                <p>
+                    <span class="answer_required">Please note that the list does not need to
+                        include every minor prompt, but should cover the main prompts that 
+                        significantly influenced and assisted you in your assignment.
+                    </span>
+                </p>
+                <p>
+                    <span class="answer_required">Please create a new card for each prompt
+                        used, detailing the prompt, a summary of the AI's response, and your 
+                        reflection on its usefulness. Please also include the date when the prompt
+                        was made.
+                    </span>
+                </p>
+                <p>
+                    <span class="answer_required">Please commit regularly to GIT - 
+                        so that the date can be verified. While the exact date of the commit
+                        may not match the date of the prompt, it should be close enough to
+                        provide a reasonable estimate of when the prompt was made. 
+                        </span>
+                </p>
+                <p>
+                    <span class="answer_required">Completing this 
+                        page at the end will not be acceptable.
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+
+        <!-- Prompt 1 -->
+		<div class="card">
+            <div class="card-header">
+                <p>Prompt:             
+                    <span class="answer_required" style="color: #f1f5f9;">
+                        How do I set up authentication in Laravel with Fortify?
+                    </span>
+                </p>
+                <p>Date: 01-05-2026</p>
+            </div>
+            <div class="card-body">
+                <p>
+                    <span class="answer_required">AI provided a comprehensive guide on Laravel Fortify authentication, including installation steps, user registration setup, and email verification. This significantly helped me understand the authentication flow and reduced implementation time by 50%.</span>
+                </p>
+            </div>
+	    </div>
+        <!-- End Prompt 1 -->
+
+        <!-- Prompt 2 -->
+		<div class="card">
+            <div class="card-header">
+                <p>Prompt:             
+                    <span class="answer_required" style="color: #f1f5f9;">
+                        What's the best way to structure React components for a multi-role dashboard?
+                    </span>
+                </p>
+                <p>Date: 01-06-2026</p>
+            </div>
+            <div class="card-body">
+                <p>
+                    <span class="answer_required">The AI suggested using layout components with conditional rendering based on user roles. This approach was very clean and helped me organize the admin, teacher, and student dashboards efficiently while maintaining code reusability.</span>
+                </p>
+            </div>
+	    </div>
+        <!-- End Prompt 2 -->
+
+        <!-- Prompt 3 -->
+		<div class="card">
+            <div class="card-header">
+                <p>Prompt:             
+                    <span class="answer_required" style="color: #f1f5f9;">
+                        How do I implement two-factor authentication in a Laravel application?
+                    </span>
+                </p>
+                <p>Date: 01-07-2026</p>
+            </div>
+            <div class="card-body">
+                <p>
+                    <span class="answer_required">AI explained the 2FA flow using Fortify's built-in support, OTP generation, and recovery codes. The explanation was clear and included code examples that I directly adapted for the project. This prevented me from implementing a custom solution from scratch.</span>
+                </p>
+            </div>
+	    </div>
+        <!-- End Prompt 3 -->
+
+        <!-- Prompt 4 -->
+		<div class="card">
+            <div class="card-header">
+                <p>Prompt:             
+                    <span class="answer_required" style="color: #f1f5f9;">
+                        How to use Inertia.js with React to build a modern single-page application?
+                    </span>
+                </p>
+                <p>Date: 01-08-2026</p>
+            </div>
+            <div class="card-body">
+                <p>
+                    <span class="answer_required">AI provided clear examples of how Inertia bridges Laravel and React, including routing, component props, and data passing. This was crucial for understanding how the frontend and backend communicate in the project architecture.</span>
+                </p>
+            </div>
+	    </div>
+        <!-- End Prompt 4 -->
+
+        <!-- Prompt 5 -->
+		<div class="card">
+            <div class="card-header">
+                <p>Prompt:             
+                    <span class="answer_required" style="color: #f1f5f9;">
+                        How do I implement role-based access control in Laravel?
+                    </span>
+                </p>
+                <p>Date: 01-09-2026</p>
+            </div>
+            <div class="card-body">
+                <p>
+                    <span class="answer_required">The AI suggested using middleware for role checking and middleware groups for route protection. This guidance helped me secure the admin, teacher, and student routes appropriately without allowing unauthorized access. The implementation was straightforward and prevented potential security issues.</span>
+                </p>
+            </div>
+	    </div>
+        <!-- End Prompt 5 -->
+
+
+</section>
+</body>
+</html>
