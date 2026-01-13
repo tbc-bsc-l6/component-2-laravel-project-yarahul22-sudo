@@ -55,6 +55,7 @@ type Teacher = {
     id: number;
     name: string;
     email: string;
+    role: string;
     modules_count?: number;
 };
 
@@ -611,18 +612,65 @@ export default function AdminDashboard() {
                                                 <BookOpen className="h-3 w-3" />
                                                 {teacher.modules_count || 0} module(s)
                                             </Badge>
-                                            <Button 
-                                                size="sm" 
-                                                variant="ghost"
-                                                className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                onClick={async () => {
-                                                    if (!confirm(`Delete teacher ${teacher.name}?`)) return;
-                                                    router.delete(`/admin/teachers/${teacher.id}`, { preserveScroll: true });
-                                                }}
-                                            >
-                                                <Trash2 className="h-3 w-3" />
-                                                Remove
-                                            </Button>
+                                            <div className="flex gap-2">
+                                                <Sheet>
+                                                    <SheetTrigger asChild>
+                                                        <Button size="sm" variant="outline" className="gap-1">
+                                                            <Settings2 className="h-3 w-3" />
+                                                            Change Role
+                                                        </Button>
+                                                    </SheetTrigger>
+                                                    <SheetContent>
+                                                        <SheetHeader>
+                                                            <SheetTitle>Change Role for {teacher.name}</SheetTitle>
+                                                            <SheetDescription>
+                                                                Update user role status
+                                                            </SheetDescription>
+                                                        </SheetHeader>
+                                                        <form
+                                                            onSubmit={(e) => {
+                                                                e.preventDefault();
+                                                                patchRole(`/admin/users/${teacher.id}/role`, {
+                                                                    preserveScroll: true,
+                                                                    onSuccess: () => {
+                                                                        resetRole();
+                                                                    },
+                                                                });
+                                                            }}
+                                                            className="grid gap-3 p-4"
+                                                        >
+                                                            <div>
+                                                                <label className="mb-1 block text-sm font-medium">Role</label>
+                                                                <select 
+                                                                    name="role" 
+                                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                                    value={roleData.role || teacher.role}
+                                                                    onChange={(e) => setRoleData('role', e.target.value)}
+                                                                >
+                                                                    <option value="student">Student</option>
+                                                                    <option value="old_student">Old Student</option>
+                                                                    <option value="teacher">Teacher</option>
+                                                                </select>
+                                                            </div>
+                                                            <Button type="submit" disabled={roleProcessing}>
+                                                                {roleProcessing ? 'Updating...' : 'Update Role'}
+                                                            </Button>
+                                                        </form>
+                                                    </SheetContent>
+                                                </Sheet>
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="ghost"
+                                                    className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                    onClick={async () => {
+                                                        if (!confirm(`Delete teacher ${teacher.name}?`)) return;
+                                                        router.delete(`/admin/teachers/${teacher.id}`, { preserveScroll: true });
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                    Remove
+                                                </Button>
+                                            </div>
                                         </CardFooter>
                                     </Card>
                                 ))
@@ -703,7 +751,6 @@ export default function AdminDashboard() {
                                                                 <option value="student">Student</option>
                                                                 <option value="old_student">Old Student</option>
                                                                 <option value="teacher">Teacher</option>
-                                                                <option value="admin">Admin</option>
                                                             </select>
                                                         </div>
                                                         <Button type="submit" disabled={roleProcessing}>
